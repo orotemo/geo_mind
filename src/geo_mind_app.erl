@@ -13,7 +13,7 @@ start(_Type, _Args) ->
                                      <<"/tmp/geo_mind">>),
   DbDownloadUrl = application:get_env(geo_mind, db_url, ?DB_DOWNLOAD_URL),
 
-  ok = filelib:ensure_dir(DownloadsDir),
+  ok = filelib:ensure_dir(filename:join(DownloadsDir, <<".keep">>)),
 
   geo_mind_sup:start_link(#{ refresh_freq => RefreshFreq,
                              downloads_dir => DownloadsDir,
