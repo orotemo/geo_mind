@@ -1,0 +1,7 @@
+.erlang.mk
+_rel
+deps
+ebin
+geodata2_lib.d
+rel
+*.d
