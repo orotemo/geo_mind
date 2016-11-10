@@ -30,7 +30,7 @@ start_link(Config) ->
 lookup(IPs) when is_list(IPs) ->
   case lookup_many(IPs) of
     {_IP, Result} -> Result;
-    not_found -> not_found
+    Else -> Else
   end;
 
 lookup(IP) when is_binary(IP) ->  lookup([IP]).
@@ -108,7 +108,10 @@ do_lookup(Res, _Data, []) -> Res;
 do_lookup(not_found, Data, [IP | IPs]) ->
   case geodata2_lib:lookup(Data, IP) of
     not_found -> do_lookup(not_found, Data, IPs);
-    {ok, Res} -> {IP, Res}
+    {ok, Res} -> {IP, Res};
+    Else ->
+      error_logger:warning_msg("Got ~p with IP ~p~n", [Else, IP]),
+      do_lookup(not_found, Data, IPs)
   end.
 
 handle_refresh_db(#{ database_path := DbPath,
