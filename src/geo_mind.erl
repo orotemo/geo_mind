@@ -1,7 +1,12 @@
 -module(geo_mind).
 -behaviour(gen_server).
 
--export([start_link/1, lookup/1, refresh_db/0, to_code_country_city/1]).
+-export([start_link/1,
+         lookup/1,
+         lookup_many/1,
+         refresh_db/0,
+         to_code_country_city/1]).
+
 -define(TIMEOUT, 300).
 -define(DB_FILENAME, <<"GeoLite2-City.mmdb.gz">>).
 -define(ETAG_FILENAME, <<"etag.txt">>).
@@ -22,14 +27,20 @@
 start_link(Config) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE,[Config], []).
 
-lookup([]) -> not_found;
 lookup(IPs) when is_list(IPs) ->
-  case ets:lookup(?MODULE, maxmind_data) of
-    [{maxmind_data, undefined}] -> undefined;
-    [{maxmind_data, Data}] -> do_lookup(not_found, Data, IPs)
+  case lookup_many(IPs) of
+    {_IP, Result} -> Result;
+    not_found -> not_found
   end;
 
 lookup(IP) when is_binary(IP) ->  lookup([IP]).
+
+lookup_many([]) -> not_found;
+lookup_many(IPs) when is_list(IPs) ->
+  case ets:lookup(?MODULE, maxmind_data) of
+    [{maxmind_data, undefined}] -> undefined;
+    [{maxmind_data, Data}] -> do_lookup(not_found, Data, IPs)
+  end.
 
 to_code_country_city(Result) when is_map(Result) ->
   { geodata2_utils:country_code(Result),
@@ -95,9 +106,10 @@ db_location(BaseDir) -> filename:join(BaseDir, ?DB_FILENAME).
 
 do_lookup(Res, _Data, []) -> Res;
 do_lookup(not_found, Data, [IP | IPs]) ->
-  Res = geodata2_lib:lookup(Data, IP),
-  do_lookup(Res, Data, IPs);
-do_lookup(Found, _Data, _IPs) -> Found.
+  case geodata2_lib:lookup(Data, IP) of
+    not_found -> do_lookup(not_found, Data, IPs);
+    {ok, Res} -> {IP, Res}
+  end.
 
 handle_refresh_db(#{ database_path := DbPath,
                      refresh_freq := RefreshFreqInSec} = State) ->
