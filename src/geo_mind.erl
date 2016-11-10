@@ -22,11 +22,14 @@
 start_link(Config) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE,[Config], []).
 
-lookup(IP) when is_binary(IP) ->
+lookup([]) -> not_found;
+lookup(IPs) when is_list(IPs) ->
   case ets:lookup(?MODULE, maxmind_data) of
     [{maxmind_data, undefined}] -> undefined;
-    [{maxmind_data, Data}] -> geodata2_lib:lookup(Data, IP)
-  end.
+    [{maxmind_data, Data}] -> do_lookup(not_found, Data, IPs)
+  end;
+
+lookup(IP) when is_binary(IP) ->  lookup([IP]).
 
 to_code_country_city(Result) when is_map(Result) ->
   { geodata2_utils:country_code(Result),
@@ -89,6 +92,12 @@ code_change(_OldVsn, State, _Extra) ->
 %%%%%%%%%%% PRIVATE %%%%%%%%%%%%
 
 db_location(BaseDir) -> filename:join(BaseDir, ?DB_FILENAME).
+
+do_lookup(Res, _Data, []) -> Res;
+do_lookup(not_found, Data, [IP | IPs]) ->
+  Res = geodata2_lib:lookup(Data, IP),
+  do_lookup(Res, Data, IPs);
+do_lookup(Found, _Data, _IPs) -> Found.
 
 handle_refresh_db(#{ database_path := DbPath,
                      refresh_freq := RefreshFreqInSec} = State) ->
