@@ -36,7 +36,7 @@ refresh_db() -> gen_server:cast(?MODULE, refresh_db).
 
 get_db() ->
   try gen_server:call(geo_mind_loader, get_db, 1000) of
-    {database, DB} -> {database, DB};
+    {ok, DB} -> {ok, DB};
     _ -> {error, database_not_ready}
   catch
     _:_ -> {error, database_not_ready}
