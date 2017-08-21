@@ -54,7 +54,7 @@ handle_info(refresh, State) ->
   erlang:cancel_timer(TimerRef),
 
   case geo_mind_loader:get_db() of
-    {database, DB} ->
+    {ok, DB} ->
       State1 = State#{
         timer_ref => erlang:send_after(Freq, self(), refresh),
         db => DB

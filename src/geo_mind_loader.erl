@@ -66,8 +66,8 @@ init([#{refresh_freq := RefreshFreqInDays, downloads_dir := DbDir} = Config]) ->
 
 handle_call(get_db, _From, #{db := Data} = State) ->
   case Data of
-    undefined -> {reply, database_not_fetched, State};
-    _ -> {reply, {database, Data}, State}
+    undefined -> {reply, {error, database_not_fetched}, State};
+    _ -> {reply, {ok, Data}, State}
   end;
 
 handle_call(_Request, _From, State) ->
