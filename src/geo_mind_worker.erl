@@ -53,7 +53,7 @@ handle_info(refresh, State) ->
   #{worker_refresh_freq := Freq, timer_ref := TimerRef} = State,
   erlang:cancel_timer(TimerRef),
 
-  case gen_server:call(geo_mind_loader, get_db) of
+  case geo_mind_loader:get_db() of
     {database, DB} ->
       State1 = State#{
         timer_ref => erlang:send_after(Freq, self(), refresh),
