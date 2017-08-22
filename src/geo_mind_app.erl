@@ -15,10 +15,14 @@ start(_Type, _Args) ->
 
   ok = filelib:ensure_dir(filename:join(DownloadsDir, <<".keep">>)),
 
-  geo_mind_sup:start_link(#{ refresh_freq => RefreshFreq,
-                             downloads_dir => DownloadsDir,
-                             db_download_url => DbDownloadUrl
-                           }).
+  WorkerRefreshFreq = application:get_env(geo_mind, worker_refresh_freq, 1), %in days
+
+  geo_mind_sup:start_link(
+    #{ refresh_freq => RefreshFreq,
+      downloads_dir => DownloadsDir,
+      db_download_url => DbDownloadUrl,
+      worker_refresh_freq => WorkerRefreshFreq
+    }).
 
 stop(_State) -> ok.
 
