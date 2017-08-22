@@ -2,8 +2,7 @@
 -behaviour(gen_server).
 
 -export([start_link/1,
-         refresh_db/0,
-         to_code_country_city/1]).
+         refresh_db/0]).
 
 -define(TIMEOUT, 300).
 -define(DB_FILENAME, <<"GeoLite2-City.mmdb.gz">>).
@@ -25,12 +24,6 @@
 %%%
 start_link(Config) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE,[Config], []).
-
-to_code_country_city(Result) when is_map(Result) ->
-  { geodata2_utils:country_code(Result),
-    geodata2_utils:country_name(Result),
-    geodata2_utils:city_name(Result)
-  }.
 
 refresh_db() -> gen_server:cast(?MODULE, refresh_db).
 
