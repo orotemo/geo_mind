@@ -1,0 +1,9 @@
+{application, 'geo_mind', [
+	{description, "App for maintaining valid maxmind db."},
+	{vsn, "0.1.0"},
+	{modules, ['geo_mind','geo_mind_app','geo_mind_loader','geo_mind_sup','geo_mind_worker']},
+	{registered, [geo_mind_sup]},
+	{applications, [kernel,stdlib,geodata2_lib,hackney,poolboy,lager]},
+	{mod, {geo_mind_app, []}},
+	{env, []}
+]}.
