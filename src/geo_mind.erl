@@ -13,10 +13,13 @@ lookup_many(IPs) ->
     fun(Worker) -> gen_server:call(Worker, {lookup_many, IPs}) end).
 
 to_details(Result) when is_map(Result) ->
-  #{geodata_continent =>
+  #{continent_code =>
       geodata2_utils:map_search([<<"continent">>, <<"code">>], Result),
-    geodata_counry => geodata2_utils:country_code(Result),
-    geodata_code => geodata2_utils:country_name(Result),
-    geodata_city => geodata2_utils:city_name(Result),
+    continent_name =>
+      geodata2_utils:map_search([<<"continent">>, <<"names">>, <<"en">>],
+                                Result),
+    country_code => geodata2_utils:country_code(Result),
+    country_name => geodata2_utils:country_name(Result),
+    city_name => geodata2_utils:city_name(Result),
     location => geodata2_utils:map_search([<<"location">>], Result)
   }.
